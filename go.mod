@@ -1,6 +1,6 @@
 module github.com/InSleepMode/VK-SPbU-BackendCourse
 
-go 1.26.5
+go 1.26
 
 require (
 	github.com/swaggo/http-swagger v1.3.4
