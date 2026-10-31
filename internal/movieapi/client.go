@@ -12,7 +12,13 @@ import (
 var ErrNotFound = errors.New("not found")
 
 type Movie struct {
-	ID int `json:"id"`
+	ID          int      `json:"id"`
+	Title       string   `json:"title"`
+	Year        int      `json:"year"`
+	Director    string   `json:"director"`
+	Description string   `json:"description"`
+	Actors      []string `json:"actors"`
+	Genres      []string `json:"genres"`
 }
 
 type MovieClient struct {

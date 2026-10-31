@@ -64,6 +64,11 @@ func (s *Server) handleLoadMovies(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if from <= 0 || from > to {
+		http.Error(w, "invalid range", http.StatusBadRequest)
+		return
+	}
+
 	ctx, cancel := context.WithTimeout(r.Context(), 5*time.Second)
 	defer cancel()
 
