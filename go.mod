@@ -1,6 +1,6 @@
 module github.com/InSleepMode/VK-SPbU-BackendCourse
 
-go 1.26
+go 1.26.0
 
 require (
 	github.com/swaggo/http-swagger v1.3.4
@@ -27,4 +27,3 @@ require (
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20260817212433-ac3dfec99bb1 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 )
-
