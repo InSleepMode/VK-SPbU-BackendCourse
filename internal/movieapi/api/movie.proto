@@ -1,0 +1,25 @@
+syntax = "proto3";
+
+package movieapi;
+
+option go_package = "github.com/InSleepMode/VK-SPbU-BackendCourse/pkg/movieapi";
+
+message Movie {
+    int64 id = 1;
+}
+
+message LoadMoviesRequest {
+    int64 from = 1;
+    int64 to = 2;
+}
+
+message LoadMoviesResponse {
+    repeated Movie movies = 1;
+}
+
+message GetLastMovieRequest {}
+
+service MovieService {
+    rpc LoadMovies(LoadMoviesRequest) returns (LoadMoviesResponse);
+    rpc GetLastMovie(GetLastMovieRequest) returns (Movie);
+}
