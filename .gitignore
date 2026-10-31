@@ -1,3 +1,4 @@
+
 /cmd/app/app
 *.exe
 *.out
@@ -11,3 +12,10 @@
 .vscode/
 
 vendor/
+/bin/
+/pkg/
+*.exe
+*.test
+
+.DS_Store
+
