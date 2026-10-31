@@ -1,6 +1,21 @@
+
+/cmd/app/app
+*.exe
+*.out
+*.dll
+*.so
+*.dylib
+
+.DS_Store
+
+.idea/
+.vscode/
+
+vendor/
 /bin/
 /pkg/
 *.exe
 *.test
 
 .DS_Store
+
