@@ -1,2 +1,2 @@
 # VK-SPbU-BackendCourse
--VK&SPbU golang backend course
+VK&SPbU golang backend course
