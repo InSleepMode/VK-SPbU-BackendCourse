@@ -1,4 +1,4 @@
-package server
+package handler
 
 import (
 	"context"
@@ -7,15 +7,15 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/InSleepMode/VK-SPbU-BackendCourse/internal/movieapi"
+	"github.com/InSleepMode/VK-SPbU-BackendCourse/internal/usecase"
 )
 
-type Server struct {
-	client *movieapi.MovieClient
+type HTTPServer struct {
+	uc usecase.MovieUseCase
 }
 
-func NewServer(client *movieapi.MovieClient) *Server {
-	return &Server{client: client}
+func NewHTTPServer(uc usecase.MovieUseCase) *HTTPServer {
+	return &HTTPServer{uc: uc}
 }
 
 // @Summary Получить последний фильм
@@ -24,11 +24,11 @@ func NewServer(client *movieapi.MovieClient) *Server {
 // @Produce json
 // @Success 200 "Успешный ответ"
 // @Router /last-movie [get]
-func (s *Server) handleGetLastMovie(w http.ResponseWriter, r *http.Request) {
+func (s *HTTPServer) handleGetLastMovie(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithTimeout(r.Context(), 5*time.Second)
 	defer cancel()
 
-	movie, err := s.client.GetLastMovie(ctx)
+	movie, err := s.uc.GetLastMovie(ctx)
 
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -48,7 +48,7 @@ func (s *Server) handleGetLastMovie(w http.ResponseWriter, r *http.Request) {
 // @Param to query int true "Конечный ID фильма"
 // @Success 200 "Успешный ответ"
 // @Router /load-movies [get]
-func (s *Server) handleLoadMovies(w http.ResponseWriter, r *http.Request) {
+func (s *HTTPServer) handleLoadMovies(w http.ResponseWriter, r *http.Request) {
 	fromStr := r.URL.Query().Get("from")
 	toStr := r.URL.Query().Get("to")
 
@@ -72,7 +72,7 @@ func (s *Server) handleLoadMovies(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithTimeout(r.Context(), 5*time.Second)
 	defer cancel()
 
-	movies, err := s.client.GetMovies(ctx, from, to)
+	movies, err := s.uc.LoadMovies(ctx, from, to)
 
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -84,7 +84,7 @@ func (s *Server) handleLoadMovies(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(movies)
 }
 
-func (s *Server) RegisterRoutes(mux *http.ServeMux) {
+func (s *HTTPServer) RegisterRoutes(mux *http.ServeMux) {
 	mux.HandleFunc("/last-movie", s.handleGetLastMovie)
 	mux.HandleFunc("/load-movies", s.handleLoadMovies)
 }

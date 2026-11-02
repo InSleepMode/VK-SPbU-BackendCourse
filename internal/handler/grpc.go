@@ -1,10 +1,10 @@
-package server
+package handler
 
 import (
 	"context"
 	"time"
 
-	"github.com/InSleepMode/VK-SPbU-BackendCourse/internal/movieapi"
+	"github.com/InSleepMode/VK-SPbU-BackendCourse/internal/usecase"
 	pb "github.com/InSleepMode/VK-SPbU-BackendCourse/pkg/movieapi"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -12,18 +12,15 @@ import (
 
 type GRPCServer struct {
 	pb.UnimplementedMovieServiceServer
-	client *movieapi.MovieClient
+	uc usecase.MovieUseCase
 }
 
-func NewGRPCServer(client *movieapi.MovieClient) *GRPCServer {
-	return &GRPCServer{client: client}
+func NewGRPCServer(uc usecase.MovieUseCase) *GRPCServer {
+	return &GRPCServer{uc: uc}
 }
 
 func (s *GRPCServer) GetLastMovie(ctx context.Context, req *pb.GetLastMovieRequest) (*pb.Movie, error) {
-	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
-	defer cancel()
-
-	movie, err := s.client.GetLastMovie(ctx)
+	movie, err := s.uc.GetLastMovie(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -41,7 +38,7 @@ func (s *GRPCServer) LoadMovies(ctx context.Context, req *pb.LoadMoviesRequest) 
 	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
 	defer cancel()
 
-	movies, err := s.client.GetMovies(ctx, int(req.From), int(req.To))
+	movies, err := s.uc.LoadMovies(ctx, int(req.From), int(req.To))
 	if err != nil {
 		return nil, err
 	}

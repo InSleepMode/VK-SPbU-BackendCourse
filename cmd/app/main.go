@@ -6,8 +6,9 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/InSleepMode/VK-SPbU-BackendCourse/internal/movieapi"
-	"github.com/InSleepMode/VK-SPbU-BackendCourse/internal/server"
+	"github.com/InSleepMode/VK-SPbU-BackendCourse/internal/adapter"
+	"github.com/InSleepMode/VK-SPbU-BackendCourse/internal/handler"
+	"github.com/InSleepMode/VK-SPbU-BackendCourse/internal/usecase"
 	pb "github.com/InSleepMode/VK-SPbU-BackendCourse/pkg/movieapi"
 	httpSwagger "github.com/swaggo/http-swagger"
 	"google.golang.org/grpc"
@@ -37,7 +38,10 @@ func main() {
 		grpcAddr = ":50051"
 	}
 
-	client := movieapi.NewMovieClient(baseURL)
+	movieClient := adapter.NewHTTPMovieClient(baseURL)
+	movieUC := usecase.NewMovieUseCase(movieClient)
+	httpSrv := handler.NewHTTPServer(movieUC)
+	grpcSrv := handler.NewGRPCServer(movieUC)
 
 	go func() {
 		lis, err := net.Listen("tcp", grpcAddr)
@@ -46,7 +50,7 @@ func main() {
 		}
 
 		grpcServer := grpc.NewServer()
-		pb.RegisterMovieServiceServer(grpcServer, server.NewGRPCServer(client))
+		pb.RegisterMovieServiceServer(grpcServer, grpcSrv)
 
 		log.Printf("Starting gRPC server on %s", grpcAddr)
 		if err := grpcServer.Serve(lis); err != nil {
@@ -54,10 +58,8 @@ func main() {
 		}
 	}()
 
-	srv := server.NewServer(client)
-
 	mux := http.NewServeMux()
-	srv.RegisterRoutes(mux)
+	httpSrv.RegisterRoutes(mux)
 
 	//handler for swagger
 	mux.Handle("/swagger/", httpSwagger.WrapHandler)
