@@ -73,11 +73,6 @@ func main() {
 		grpcAddr = ":50051"
 	}
 
-	// ctx, cancel := context.WithTimeout(
-	// 	context.Background(), 5*time.Second,
-	// )
-	// defer cancel()
-
 	ctx := context.Background()
 
 	//создаем пул на приложение
@@ -94,7 +89,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	// 0. Накатываем встроенные SQL-миграции до первого запроса.
+	// Накатываем встроенные SQL-миграции до первого запроса.
 	// Goose работает через database/sql, поэтому адаптируем пул pgx.
 	migrationDB := stdlib.OpenDBFromPool(pool)
 	defer migrationDB.Close()
