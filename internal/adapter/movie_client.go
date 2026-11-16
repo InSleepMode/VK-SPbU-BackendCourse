@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/InSleepMode/VK-SPbU-BackendCourse/internal/domain"
 )
@@ -12,10 +13,11 @@ import (
 type HTTPMovieClient struct {
 	baseURL    string
 	httpClient *http.Client
+	timeout    time.Duration
 }
 
 func NewHTTPMovieClient(url string) *HTTPMovieClient {
-	return &HTTPMovieClient{baseURL: url, httpClient: &http.Client{}}
+	return &HTTPMovieClient{baseURL: url, httpClient: &http.Client{}, timeout: 10 * time.Second}
 }
 
 func (c *HTTPMovieClient) GetMovie(ctx context.Context, id int) (domain.Movie, error) {
