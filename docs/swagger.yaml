@@ -1,0 +1,43 @@
+basePath: /
+host: localhost:8080
+info:
+  contact: {}
+  description: Go-сервис, который предоставляет HTTP и gRPC API и внутри ходит во
+    внешний фильм-стенд
+  title: movie api
+  version: "1.0"
+paths:
+  /last-movie:
+    get:
+      description: Ищет и возвращает последний добавленный фильм на стенде
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Успешный ответ
+      summary: Получить последний фильм
+      tags:
+      - movies
+  /load-movies:
+    get:
+      description: Загружает фильмы с указанными ID (от from до to)
+      parameters:
+      - description: Начальный ID фильма
+        in: query
+        name: from
+        required: true
+        type: integer
+      - description: Конечный ID фильма
+        in: query
+        name: to
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Успешный ответ
+      summary: Загрузить диапазон фильмов
+      tags:
+      - movies
+swagger: "2.0"
