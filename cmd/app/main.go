@@ -19,6 +19,7 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/jackc/pgx/v5/stdlib"
 	"github.com/pressly/goose/v3"
+	"github.com/redis/go-redis/v9"
 	httpSwagger "github.com/swaggo/http-swagger"
 	"google.golang.org/grpc"
 
@@ -95,11 +96,11 @@ func main() {
 	defer migrationDB.Close()
 	provider, err := goose.NewProvider(goose.DialectPostgres, migrationDB, migrations.Files)
 	if err != nil {
-		log.Fatalf("создать goose: %v", err)
+		log.Fatalf("create goose: %v", err)
 	}
 	// Up применяет только новые миграции, записывая версии в goose_db_version.
 	if _, err := provider.Up(ctx); err != nil {
-		log.Fatalf("применить миграции: %v", err)
+		log.Fatalf("use migrations: %v", err)
 	}
 
 	repo := repository.NewMovieRepository(pool) //сначала репозиторий
@@ -108,10 +109,27 @@ func main() {
 		log.Fatal(err)
 	}
 
-	movieUC := usecase.NewMovieUseCase(repo) //теперь ходим в бд, а не во внешний стенд
+	redisDatabaseURL := os.Getenv("REDIS_ADDR")
+	if redisDatabaseURL == "" {
+		redisDatabaseURL = "localhost:6379"
+	}
+
+	rdb := redis.NewClient(&redis.Options{Addr: redisDatabaseURL})
+	if err := rdb.Ping(ctx).Err(); err != nil {
+		log.Fatalf("failed to connect to RedisDB: %v", err)
+
+	}
+	defer rdb.Close()
+
+	searchRepo := repository.NewSearchRepository(rdb)
+	movieUC := usecase.NewMovieUseCase(repo, searchRepo) //теперь ходим в бд, а не во внешний стенд
 	httpSrv := handler.NewHTTPServer(movieUC)
 	grpcSrv := handler.NewGRPCServer(movieUC)
 
+	err = movieUC.WarmUpIndex(ctx)
+	if err != nil {
+		log.Fatalf("failed to warm up search index: %v", err)
+	}
 	go func() {
 		lis, err := net.Listen("tcp", grpcAddr)
 		if err != nil {
